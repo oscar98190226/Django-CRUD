@@ -1,9 +1,12 @@
 from django.contrib.auth.models import User
+from .models import Entry
+
 from django.contrib.auth import authenticate, login
 from rest_framework_jwt.settings import api_settings
 from rest_framework import permissions, generics, status, viewsets
+
 from rest_framework.response import Response
-from .serializers import TokenSerializer, UserSerializer
+from .serializers import TokenSerializer, UserSerializer, EntrySerializer
 
 # Get the JWT settings, add these lines after the import/from lines
 jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
@@ -59,9 +62,14 @@ class SignupView(generics.CreateAPIView):
         return Response(status=status.HTTP_201_CREATED)
 
 class UserViewSet(viewsets.ModelViewSet):
-    """
-    User CRUD
-    """
+    #User CRUD
+
     serializer_class = UserSerializer
     queryset = User.objects.all()
     permission_classes = (permissions.AllowAny,)
+
+class EntryViewSet(viewsets.ModelViewSet):
+    # Entry CRUD
+
+    serializer_class = EntrySerializer
+    queryset = Entry.objects.all()
