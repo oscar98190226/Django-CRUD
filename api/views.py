@@ -66,7 +66,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     serializer_class = UserSerializer
     queryset = User.objects.all()
-    permission_classes = (permissions.AllowAny,)
+    permission_classes = (permissions.IsAuthenticated,)
 
 class EntryViewSet(viewsets.ModelViewSet):
     # Entry CRUD
