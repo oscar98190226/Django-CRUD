@@ -5,7 +5,7 @@ from .views import LoginView, SignupView, UserViewSet, EntryViewSet, WeeklyRepor
 router = routers.DefaultRouter()
 
 router.register(r'user', UserViewSet)
-router.register(r'entry', EntryViewSet)
+router.register(r'entry', EntryViewSet, basename='entry')
 
 auth_urls = [
 	path('login/', LoginView.as_view(), name="login"),

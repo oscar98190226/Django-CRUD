@@ -80,11 +80,11 @@ class EntryViewSet(viewsets.ModelViewSet):
 
     serializer_class = EntrySerializer
     permission_classes = (permissions.IsAuthenticated, EntryAccessPermission,)
-    queryset = Entry.objects.all()
+    # queryset = Entry.objects.all()
 
-    # def get_queryset(self):
-    #     return Entry.objects.all()
-    #     # return self.request.user.entry.all()
+    def get_queryset(self):
+        # return Entry.objects.all()
+        return self.request.user.entry.all()
 
 @api_view(['GET'])
 @permission_classes((permissions.IsAuthenticated, EntryAccessPermission,))
