@@ -3,6 +3,7 @@ from .models import Entry
 from .permissions import UserAccessPermission, EntryAccessPermission
 
 from django.contrib.auth import authenticate, login
+from django.shortcuts import get_object_or_404
 from rest_framework_jwt.settings import api_settings
 from rest_framework import permissions, generics, status, viewsets
 
@@ -72,8 +73,18 @@ class UserViewSet(viewsets.ModelViewSet):
     #User CRUD
 
     serializer_class = UserSerializer
-    queryset = User.objects.all()
+    # queryset = User.objects.all()
     permission_classes = (permissions.IsAuthenticated, UserAccessPermission,)
+
+    def get_queryset(self):
+        obj = User.objects.all()
+        self.check_object_permissions(self.request, obj)
+        return obj
+
+    def get_object(self):
+        obj = get_object_or_404(self.get_queryset(), pk=self.kwargs["pk"])
+        self.check_object_permissions(self.request, obj)
+        return obj
 
 class EntryViewSet(viewsets.ModelViewSet):
     # Entry CRUD

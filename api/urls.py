@@ -4,7 +4,7 @@ from .views import LoginView, SignupView, UserViewSet, EntryViewSet, WeeklyRepor
 
 router = routers.DefaultRouter()
 
-router.register(r'user', UserViewSet)
+router.register(r'user', UserViewSet, basename='user')
 router.register(r'entry', EntryViewSet, basename='entry')
 
 auth_urls = [
