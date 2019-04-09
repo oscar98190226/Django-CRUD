@@ -95,6 +95,8 @@ class EntryViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         obj = self.request.user.entry.all()
+        if requst.user.profile.role == 'ADMIN':
+            obj = Entry.objects.all()
         self.check_object_permissions(self.request, obj)
         return obj
     
@@ -107,6 +109,11 @@ class EntryViewSet(viewsets.ModelViewSet):
 @api_view(['GET'])
 @permission_classes((permissions.IsAuthenticated, EntryAccessPermission,))
 def WeeklyReport(request):
-    report = Entry.objects.annotate(year=ExtractYear('date')).annotate(week=ExtractWeek('date')).values('year', 'week').annotate(totalDistance=Sum('distance')).annotate(totalDuration=Sum('duration'))
+    report = Entry.objects \
+                .annotate(year=ExtractYear('date')) \
+                .annotate(week=ExtractWeek('date')) \
+                .values('year', 'week') \
+                .annotate(totalDistance=Sum('distance')) \
+                .annotate(totalDuration=Sum('duration'))
 
     return Response(report)
