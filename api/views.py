@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from .models import Entry
+from .permissions import UserAccessPermission, EntryAccessPermission
 
 from django.contrib.auth import authenticate, login
 from rest_framework_jwt.settings import api_settings
@@ -7,6 +8,11 @@ from rest_framework import permissions, generics, status, viewsets
 
 from rest_framework.response import Response
 from .serializers import TokenSerializer, UserSerializer, EntrySerializer
+
+# from rest_framework import generics 
+from django.db.models import Sum
+from django.db.models.functions import ExtractYear, ExtractWeek
+from rest_framework.decorators import api_view, permission_classes
 
 # Get the JWT settings, add these lines after the import/from lines
 jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
@@ -44,32 +50,45 @@ class SignupView(generics.CreateAPIView):
     POST auth/register/
     """
     permission_classes = (permissions.AllowAny,)
+    serializer_class = UserSerializer
 
-    def post(self, request, *args, **kwargs):
-        username = request.data.get("username", "")
-        password = request.data.get("password", "")
-        email = request.data.get("email", "")
-        if not username and not password and not email:
-            return Response(
-                data={
-                    "message": "username, password and email is required to register a user"
-                },
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        new_user = User.objects.create_user(
-            username=username, password=password, email=email
-        )
-        return Response(status=status.HTTP_201_CREATED)
+    # def post(self, request, *args, **kwargs):
+    #     username = request.data.get("username", "")
+    #     password = request.data.get("password", "")
+    #     email = request.data.get("email", "")
+    #     if not username and not password and not email:
+    #         return Response(
+    #             data={
+    #                 "message": "username, password and email is required to register a user"
+    #             },
+    #             status=status.HTTP_400_BAD_REQUEST
+    #         )
+    #     new_user = User.objects.create_user(
+    #         username=username, password=password, email=email
+    #     )
+    #     return Response(status=status.HTTP_201_CREATED)
 
 class UserViewSet(viewsets.ModelViewSet):
     #User CRUD
 
     serializer_class = UserSerializer
     queryset = User.objects.all()
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (permissions.IsAuthenticated, UserAccessPermission,)
 
 class EntryViewSet(viewsets.ModelViewSet):
     # Entry CRUD
 
     serializer_class = EntrySerializer
+    permission_classes = (permissions.IsAuthenticated, EntryAccessPermission,)
     queryset = Entry.objects.all()
+
+    # def get_queryset(self):
+    #     return Entry.objects.all()
+    #     # return self.request.user.entry.all()
+
+@api_view(['GET'])
+@permission_classes((permissions.IsAuthenticated, EntryAccessPermission,))
+def WeeklyReport(request):
+    report = Entry.objects.annotate(year=ExtractYear('date')).annotate(week=ExtractWeek('date')).values('year', 'week').annotate(totalDistance=Sum('distance')).annotate(totalDuration=Sum('duration'))
+
+    return Response(report)

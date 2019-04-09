@@ -5,7 +5,7 @@ from django.utils import timezone
 # Create your models here.
 
 class UserProfile(models.Model):
-    userId = models.OneToOneField(User, on_delete=models.CASCADE)
+    userId = models.OneToOneField(User, related_name='profile', on_delete=models.CASCADE)
     roles = (
         ('USER', 'Regular User'), 
         ('MANAGER', 'User Manager'), 
@@ -14,7 +14,7 @@ class UserProfile(models.Model):
     role = models.CharField(choices=roles, default=roles[0][0], max_length=20)
 
 class Entry(models.Model):
-    userId = models.ForeignKey(User, on_delete=models.CASCADE)
+    userId = models.ForeignKey(User, related_name='entry', on_delete=models.CASCADE)
     distance = models.PositiveIntegerField(default=0)
     duration = models.PositiveIntegerField(default=1)
     date = models.DateField(default=timezone.now)

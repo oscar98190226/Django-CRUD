@@ -22,7 +22,7 @@ class UserSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])
         user.save()
         UserProfile.objects.create(
-            userId = self.pk,
+            userId = user,
             role = 'USER'
         )
         return user

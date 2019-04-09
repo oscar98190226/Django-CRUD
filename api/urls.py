@@ -1,6 +1,6 @@
 from django.urls import path, re_path, include
 from rest_framework import routers
-from .views import LoginView, SignupView, UserViewSet, EntryViewSet
+from .views import LoginView, SignupView, UserViewSet, EntryViewSet, WeeklyReport
 
 router = routers.DefaultRouter()
 
@@ -14,5 +14,7 @@ auth_urls = [
 
 urlpatterns = [
 	path('auth/', include(auth_urls)),
+	# path('user/', UserViewSet.as_view()),
+	path('weeklyReport/', WeeklyReport, name="weekly"),
 	re_path(r'^', include(router.urls)),
 ]
