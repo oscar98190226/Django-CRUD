@@ -94,8 +94,15 @@ class EntryViewSet(viewsets.ModelViewSet):
     # queryset = Entry.objects.all()
 
     def get_queryset(self):
-        # return Entry.objects.all()
-        return self.request.user.entry.all()
+        obj = self.request.user.entry.all()
+        self.check_object_permissions(self.request, obj)
+        return obj
+    
+    def get_object(self):
+        obj = get_object_or_404(self.get_queryset(), pk=self.kwargs["pk"])
+        self.check_object_permissions(self.request, obj)
+        return obj
+
 
 @api_view(['GET'])
 @permission_classes((permissions.IsAuthenticated, EntryAccessPermission,))
