@@ -37,13 +37,16 @@ class LoginView(generics.CreateAPIView):
             # login saves the user’s ID in the session,
             # using Django’s session framework.
             login(request, user)
-            serializer = TokenSerializer(data={
+
+            return Response(data = {
                 # using drf jwt utility functions to generate a token
                 "token": jwt_encode_handler(
                     jwt_payload_handler(user)
-                )})
-            serializer.is_valid()
-            return Response(serializer.data)
+                ),
+                "username": user.username, 
+                "email": user.email, 
+                "role": user.profile.role
+            })
         return Response(status=status.HTTP_401_UNAUTHORIZED)
 
 class SignupView(generics.CreateAPIView):
@@ -53,27 +56,10 @@ class SignupView(generics.CreateAPIView):
     permission_classes = (permissions.AllowAny,)
     serializer_class = UserSerializer
 
-    # def post(self, request, *args, **kwargs):
-    #     username = request.data.get("username", "")
-    #     password = request.data.get("password", "")
-    #     email = request.data.get("email", "")
-    #     if not username and not password and not email:
-    #         return Response(
-    #             data={
-    #                 "message": "username, password and email is required to register a user"
-    #             },
-    #             status=status.HTTP_400_BAD_REQUEST
-    #         )
-    #     new_user = User.objects.create_user(
-    #         username=username, password=password, email=email
-    #     )
-    #     return Response(status=status.HTTP_201_CREATED)
-
 class UserViewSet(viewsets.ModelViewSet):
     #User CRUD
 
     serializer_class = UserSerializer
-    # queryset = User.objects.all()
     permission_classes = (permissions.IsAuthenticated, UserAccessPermission,)
 
     def get_queryset(self):
@@ -91,11 +77,10 @@ class EntryViewSet(viewsets.ModelViewSet):
 
     serializer_class = EntrySerializer
     permission_classes = (permissions.IsAuthenticated, EntryAccessPermission,)
-    # queryset = Entry.objects.all()
 
     def get_queryset(self):
         obj = self.request.user.entry.all()
-        if requst.user.profile.role == 'ADMIN':
+        if self.request.user.profile.role == 'ADMIN':
             obj = Entry.objects.all()
         self.check_object_permissions(self.request, obj)
         return obj

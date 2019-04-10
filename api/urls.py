@@ -14,7 +14,6 @@ auth_urls = [
 
 urlpatterns = [
 	path('auth/', include(auth_urls)),
-	# path('user/', UserViewSet.as_view()),
 	path('weeklyReport/', WeeklyReport, name="weekly"),
 	re_path(r'^', include(router.urls)),
 ]
