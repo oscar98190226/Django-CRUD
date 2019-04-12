@@ -8,7 +8,7 @@ from rest_framework_jwt.settings import api_settings
 from rest_framework import permissions, generics, status, viewsets
 
 from rest_framework.response import Response
-from .serializers import TokenSerializer, UserSerializer, EntrySerializer
+from .serializers import TokenSerializer, UserSerializer, EntrySerializer, SignupSerializer
 
 # from rest_framework import generics 
 from django.db.models import Sum
@@ -55,12 +55,10 @@ class SignupView(generics.CreateAPIView):
     POST auth/register/
     """
     permission_classes = (permissions.AllowAny,)
-    serializer_class = UserSerializer
+    serializer_class = SignupSerializer
 
 class UserViewSet(viewsets.ModelViewSet):
     #User CRUD
-
-    serializer_class = UserSerializer
     permission_classes = (permissions.IsAuthenticated, UserAccessPermission,)
 
     def get_queryset(self):
@@ -68,10 +66,10 @@ class UserViewSet(viewsets.ModelViewSet):
         self.check_object_permissions(self.request, obj)
         return obj
 
-    def get_object(self):
-        obj = get_object_or_404(self.get_queryset(), pk=self.kwargs["pk"])
-        self.check_object_permissions(self.request, obj)
-        return obj
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return SignupSerializer
+        return UserSerializer
 
 class EntryViewSet(viewsets.ModelViewSet):
     # Entry CRUD
@@ -80,17 +78,13 @@ class EntryViewSet(viewsets.ModelViewSet):
     permission_classes = (permissions.IsAuthenticated, EntryAccessPermission,)
 
     def get_queryset(self):
-        obj = self.request.user.entry.all()
+        from_date = self.request.query_params.get('from', '1970-01-01')
+        to_date = self.request.query_params.get('to', '2100-01-01')
+        obj = self.request.user.entry.filter(date__gte=from_date, date__lte=to_date)
         if self.request.user.profile.role == 'ADMIN':
-            obj = Entry.objects.all()
+            obj = Entry.objects.filter(date__gte=from_date, date__lte=to_date)
         self.check_object_permissions(self.request, obj)
         return obj
-    
-    def get_object(self):
-        obj = get_object_or_404(self.get_queryset(), pk=self.kwargs["pk"])
-        self.check_object_permissions(self.request, obj)
-        return obj
-
 
 
 @api_view(['GET'])
