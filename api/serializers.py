@@ -8,7 +8,13 @@ class TokenSerializer(serializers.Serializer):
     """
     token = serializers.CharField(max_length=255)
 
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        fields = ('id', 'role')
+
 class UserSerializer(serializers.ModelSerializer):
+    profile = UserProfileSerializer()
     class Meta:
         model = User
         fields = ('id', 'username', 'email', 'password', 'profile')
@@ -22,12 +28,16 @@ class UserSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])
         user.save()
         UserProfile.objects.create(
-            userId = user,
+            user = user,
             role = 'USER'
         )
         return user
 
 class EntrySerializer(serializers.ModelSerializer):
+    user = UserSerializer(required=False)
+    user_id = serializers.IntegerField()
     class Meta:
         model = Entry
-        fields = ('id', 'distance', 'duration', 'date')
+        fields = ('id', 'distance', 'duration', 'date', 'user', 'user_id')
+        read_only_fields = ('user',)
+        write_only_fields = ('user_id',)

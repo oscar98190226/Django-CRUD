@@ -43,6 +43,7 @@ class LoginView(generics.CreateAPIView):
                 "token": jwt_encode_handler(
                     jwt_payload_handler(user)
                 ),
+                "id": user.id, 
                 "username": user.username, 
                 "email": user.email, 
                 "role": user.profile.role
@@ -89,6 +90,7 @@ class EntryViewSet(viewsets.ModelViewSet):
         obj = get_object_or_404(self.get_queryset(), pk=self.kwargs["pk"])
         self.check_object_permissions(self.request, obj)
         return obj
+
 
 
 @api_view(['GET'])
